@@ -1,0 +1,69 @@
+<div class="container">
+    <header>
+        <h1>你好，小勇士！</h1>
+        <p>今天是 2026 年 7 月 13 日，我们要一起去完成这些小小挑战吗？</p>
+    </header>
+
+    <main class="task-board">
+        <div class="task-card">
+            <div class="task-info">
+                <h3>📖 中文阅读 20 分钟</h3>
+                <p>沉浸在故事里，探索文字的魅力。</p>
+            </div>
+            <button class="btn-check" onclick="markDone(this)">完成！</button>
+        </div>
+        
+        </main>
+
+    <section class="notes">
+        <textarea placeholder="写下今天的一点小小感悟，或是对孩子的鼓励吧..."></textarea>
+    </section>
+</div>
+
+body {
+    background-color: #fdfaf6; /* 暖米色，降低视觉疲劳 */
+    font-family: 'Helvetica Neue', sans-serif;
+    color: #5a4e44; /* 深棕色，比纯黑更温和 */
+}
+
+.task-card {
+    background: #ffffff;
+    border-radius: 16px; /* 圆角给人友好感 */
+    padding: 20px;
+    margin: 15px 0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05); /* 轻微阴影，悬浮感 */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 5px solid #ffcc80; /* 暖橙色条，点亮心情 */
+}
+
+.btn-check {
+    background-color: #81c784; /* 温和的绿色 */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.btn-check:hover {
+    transform: scale(1.05);
+}
+
+textarea {
+    width: 100%;
+    height: 100px;
+    border: 1px solid #e0dcd9;
+    border-radius: 12px;
+    padding: 15px;
+    margin-top: 20px;
+    background: #fcf9f5;
+}
+
+function markDone(btn) {
+    btn.innerText = "做得好！✨";
+    btn.style.backgroundColor = "#ffb74d"; // 变成暖橙色
+    btn.disabled = true;
+}
