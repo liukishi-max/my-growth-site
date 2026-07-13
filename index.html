@@ -283,23 +283,23 @@ function weekdayShort(dateStr) {
 
 async function loadData() {
   try {
-    const res = await window.storage.get(STORAGE_KEY, false);
-    entries = res ? JSON.parse(res.value) : {};
+    const raw = localStorage.getItem(STORAGE_KEY);
+    entries = raw ? JSON.parse(raw) : {};
   } catch (e) { entries = {}; }
   try {
-    const nameRes = await window.storage.get(NAME_KEY, false);
-    if (nameRes) document.getElementById('habitName').value = nameRes.value;
+    const name = localStorage.getItem(NAME_KEY);
+    if (name) document.getElementById('habitName').value = name;
   } catch (e) {}
   render();
 }
 
 async function saveEntries() {
-  try { await window.storage.set(STORAGE_KEY, JSON.stringify(entries), false); }
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); }
   catch (e) { console.error('save failed', e); }
 }
 
 async function saveName(v) {
-  try { await window.storage.set(NAME_KEY, v, false); }
+  try { localStorage.setItem(NAME_KEY, v); }
   catch (e) {}
 }
 
@@ -464,3 +464,4 @@ loadData();
 </script>
 </body>
 </html>
+
