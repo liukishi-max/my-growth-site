@@ -67,6 +67,84 @@
   }
   .habit-input:focus { border-bottom-color: var(--green); }
 
+  /* avatar dress-up */
+  .avatar-card {
+    background: var(--bg-card);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(38,53,40,0.06);
+  }
+
+  .avatar-preview {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: var(--green-soft);
+    margin: 0 auto 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    font-size: 40px;
+    transition: background 0.15s ease;
+  }
+
+  .avatar-accessory {
+    position: absolute;
+    top: -14px;
+    font-size: 26px;
+    line-height: 1;
+  }
+
+  .avatar-name-input {
+    display: block;
+    width: 100%;
+    text-align: center;
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--ink);
+    background: transparent;
+    border: none;
+    border-bottom: 1.5px dashed var(--line);
+    padding: 4px 2px 8px;
+    margin-bottom: 14px;
+    outline: none;
+  }
+  .avatar-name-input:focus { border-bottom-color: var(--green); }
+  .avatar-name-input::placeholder { color: #A6B0A2; font-weight: 400; }
+
+  .avatar-row-label {
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    margin: 10px 0 6px 2px;
+  }
+
+  .avatar-options {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .opt-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: none;
+    background: var(--bg);
+    font-size: 17px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+  }
+  .opt-btn:active { transform: scale(0.94); }
+  .opt-btn.picked { box-shadow: inset 0 0 0 2px var(--green); }
+
+  .opt-btn.color-swatch { font-size: 0; }
+
   /* 发芽 signature */
   .plant-card {
     background: var(--bg-card);
@@ -223,9 +301,26 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">习惯发芽记 · 记录主动性，不打分</div>
+    <div class="eyebrow" id="todayDate">习惯发芽记 · 记录主动性，不打分</div>
     <input class="habit-input" id="habitName" value="主动开始写作业" maxlength="20" />
   </header>
+
+  <div class="avatar-card">
+    <div class="avatar-preview" id="avatarPreview">
+      <span class="avatar-accessory" id="avatarAccessory"></span>
+      <span class="avatar-face" id="avatarFace">😊</span>
+    </div>
+    <input class="avatar-name-input" id="avatarNameInput" placeholder="点这里给自己起个名字" maxlength="8" />
+
+    <div class="avatar-row-label">选表情</div>
+    <div class="avatar-options" id="faceOptions"></div>
+
+    <div class="avatar-row-label">选颜色</div>
+    <div class="avatar-options" id="colorOptions"></div>
+
+    <div class="avatar-row-label">选配饰</div>
+    <div class="avatar-options" id="accessoryOptions"></div>
+  </div>
 
   <div class="plant-card">
     <svg class="plant-svg" id="plantSvg" viewBox="0 0 120 120"></svg>
@@ -268,7 +363,60 @@
 <script>
 const STORAGE_KEY = 'habit-tracker-entries';
 const NAME_KEY = 'habit-tracker-name';
+const AVATAR_KEY = 'habit-tracker-avatar';
 let entries = {}; // { '2026-07-13': 'g' }
+
+const FACE_OPTIONS = ['😊','😺','🐻','🦄','🐰','🐼','🐸','🦁'];
+const COLOR_OPTIONS = ['#DCE9D8','#F5E9CE','#F3DCD8','#DCE6F2','#EADCF2','#F2E6D8'];
+const ACCESSORY_OPTIONS = ['无','👑','🎩','🎀','🌸','⭐','🕶️','🧢'];
+
+let avatar = { face: '😊', color: '#DCE9D8', accessory: '无', name: '' };
+
+function renderTodayDate() {
+  const d = new Date();
+  const weekdays = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+  const txt = `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 · ${weekdays[d.getDay()]}`;
+  document.getElementById('todayDate').textContent = txt;
+}
+
+function renderAvatar() {
+  document.getElementById('avatarFace').textContent = avatar.face;
+  document.getElementById('avatarAccessory').textContent = avatar.accessory === '无' ? '' : avatar.accessory;
+  document.getElementById('avatarPreview').style.background = avatar.color;
+  document.getElementById('avatarNameInput').value = avatar.name;
+
+  document.getElementById('faceOptions').innerHTML = FACE_OPTIONS.map(f =>
+    `<button class="opt-btn ${f === avatar.face ? 'picked' : ''}" data-type="face" data-v="${f}">${f}</button>`
+  ).join('');
+
+  document.getElementById('colorOptions').innerHTML = COLOR_OPTIONS.map(c =>
+    `<button class="opt-btn color-swatch ${c === avatar.color ? 'picked' : ''}" data-type="color" data-v="${c}" style="background:${c}"></button>`
+  ).join('');
+
+  document.getElementById('accessoryOptions').innerHTML = ACCESSORY_OPTIONS.map(a =>
+    `<button class="opt-btn ${a === avatar.accessory ? 'picked' : ''}" data-type="accessory" data-v="${a}">${a === '无' ? '✕' : a}</button>`
+  ).join('');
+
+  document.querySelectorAll('.avatar-options .opt-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      avatar[btn.dataset.type] = btn.dataset.v;
+      saveAvatar();
+      renderAvatar();
+    });
+  });
+}
+
+function saveAvatar() {
+  try { localStorage.setItem(AVATAR_KEY, JSON.stringify(avatar)); }
+  catch (e) {}
+}
+
+function loadAvatar() {
+  try {
+    const raw = localStorage.getItem(AVATAR_KEY);
+    if (raw) avatar = { ...avatar, ...JSON.parse(raw) };
+  } catch (e) {}
+}
 
 function todayStr(offset = 0) {
   const d = new Date();
@@ -290,6 +438,9 @@ async function loadData() {
     const name = localStorage.getItem(NAME_KEY);
     if (name) document.getElementById('habitName').value = name;
   } catch (e) {}
+  loadAvatar();
+  renderTodayDate();
+  renderAvatar();
   render();
 }
 
@@ -453,6 +604,11 @@ document.getElementById('habitName').addEventListener('change', (e) => {
   saveName(e.target.value);
 });
 
+document.getElementById('avatarNameInput').addEventListener('change', (e) => {
+  avatar.name = e.target.value;
+  saveAvatar();
+});
+
 document.getElementById('resetBtn').addEventListener('click', async () => {
   if (!confirm('确定要清空所有记录吗？这个操作无法撤销。')) return;
   entries = {};
@@ -464,4 +620,3 @@ loadData();
 </script>
 </body>
 </html>
-
