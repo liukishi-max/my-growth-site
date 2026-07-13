@@ -1,69 +1,466 @@
-<div class="container">
-    <header>
-        <h1>你好，小勇士！</h1>
-        <p>今天是 2026 年 7 月 13 日，我们要一起去完成这些小小挑战吗？</p>
-    </header>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>习惯发芽记</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap');
 
-    <main class="task-board">
-        <div class="task-card">
-            <div class="task-info">
-                <h3>📖 中文阅读 20 分钟</h3>
-                <p>沉浸在故事里，探索文字的魅力。</p>
-            </div>
-            <button class="btn-check" onclick="markDone(this)">完成！</button>
-        </div>
-        
-        </main>
+  :root {
+    --bg: #F1F4EC;
+    --bg-card: #FFFFFF;
+    --ink: #263528;
+    --ink-soft: #5C6B5D;
+    --green: #5B8C5A;
+    --green-soft: #DCE9D8;
+    --amber: #D9A544;
+    --amber-soft: #F5E9CE;
+    --brick: #BE5B4C;
+    --brick-soft: #F3DCD8;
+    --line: #DDE3D6;
+  }
 
-    <section class="notes">
-        <textarea placeholder="写下今天的一点小小感悟，或是对孩子的鼓励吧..."></textarea>
-    </section>
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 32px 16px 64px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Noto Sans SC', sans-serif;
+    display: flex;
+    justify-content: center;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { width: 100%; max-width: 480px; }
+
+  header { margin-bottom: 28px; }
+
+  .eyebrow {
+    font-size: 13px;
+    color: var(--ink-soft);
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+  }
+
+  h1 {
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 700;
+    font-size: 26px;
+    margin: 0 0 8px;
+    line-height: 1.3;
+  }
+
+  .habit-input {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink);
+    background: transparent;
+    border: none;
+    border-bottom: 1.5px dashed var(--line);
+    padding: 4px 2px;
+    width: 100%;
+    outline: none;
+  }
+  .habit-input:focus { border-bottom-color: var(--green); }
+
+  /* 发芽 signature */
+  .plant-card {
+    background: var(--bg-card);
+    border-radius: 20px;
+    padding: 24px;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(38,53,40,0.06);
+    margin-bottom: 20px;
+  }
+
+  .plant-svg { width: 120px; height: 120px; }
+
+  .plant-caption {
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin-top: 8px;
+  }
+
+  .plant-caption b { color: var(--ink); font-weight: 700; }
+
+  /* buttons */
+  .log-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .log-btn {
+    border: none;
+    border-radius: 14px;
+    padding: 16px 6px;
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .log-btn:active { transform: scale(0.96); }
+  .log-btn .dot { width: 22px; height: 22px; border-radius: 50%; }
+
+  .log-btn.green { background: var(--green-soft); color: #2F4A30; }
+  .log-btn.green .dot { background: var(--green); }
+  .log-btn.amber { background: var(--amber-soft); color: #6B4E14; }
+  .log-btn.amber .dot { background: var(--amber); }
+  .log-btn.brick { background: var(--brick-soft); color: #6B2E23; }
+  .log-btn.brick .dot { background: var(--brick); }
+
+  .log-btn.selected { box-shadow: inset 0 0 0 2px currentColor; }
+
+  .today-note {
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin: -10px 0 20px;
+  }
+
+  /* history */
+  .section-title {
+    font-size: 13px;
+    color: var(--ink-soft);
+    letter-spacing: 0.04em;
+    margin: 0 0 10px 2px;
+  }
+
+  .days {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    margin-bottom: 24px;
+  }
+
+  .day {
+    flex: 0 0 auto;
+    width: 38px;
+    text-align: center;
+  }
+
+  .day .cell {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    margin: 0 auto 4px;
+    background: var(--line);
+  }
+  .day .cell.g { background: var(--green); }
+  .day .cell.a { background: var(--amber); }
+  .day .cell.b { background: var(--brick); }
+
+  .day .lbl { font-size: 10px; color: var(--ink-soft); }
+
+  /* stats */
+  .stat-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .stat-card {
+    flex: 1;
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 16px;
+  }
+
+  .stat-num {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  .stat-lbl {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 2px;
+  }
+
+  .stat-delta {
+    font-size: 12px;
+    margin-top: 6px;
+    font-weight: 500;
+  }
+  .stat-delta.up { color: var(--green); }
+  .stat-delta.down { color: var(--brick); }
+  .stat-delta.flat { color: var(--ink-soft); }
+
+  footer {
+    text-align: center;
+    margin-top: 28px;
+  }
+
+  .reset-btn {
+    background: none;
+    border: none;
+    color: var(--ink-soft);
+    font-size: 12px;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  .empty-note {
+    text-align: center;
+    font-size: 13px;
+    color: var(--ink-soft);
+    padding: 20px 10px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">习惯发芽记 · 记录主动性，不打分</div>
+    <input class="habit-input" id="habitName" value="主动开始写作业" maxlength="20" />
+  </header>
+
+  <div class="plant-card">
+    <svg class="plant-svg" id="plantSvg" viewBox="0 0 120 120"></svg>
+    <div class="plant-caption" id="plantCaption">开始记录，看看这两周会长成什么样</div>
+  </div>
+
+  <div class="log-row">
+    <button class="log-btn green" data-v="g">
+      <span class="dot"></span>今天主动开始
+    </button>
+    <button class="log-btn amber" data-v="a">
+      <span class="dot"></span>提醒一次就好
+    </button>
+    <button class="log-btn brick" data-v="b">
+      <span class="dot"></span>拖了挺久
+    </button>
+  </div>
+  <div class="today-note" id="todayNote">今天还没记录</div>
+
+  <div class="section-title">最近14天</div>
+  <div class="days" id="daysRow"></div>
+
+  <div class="stat-row">
+    <div class="stat-card">
+      <div class="stat-num" id="thisWeekPct">–</div>
+      <div class="stat-lbl">本周主动比例</div>
+      <div class="stat-delta" id="deltaLabel"></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="streakNum">0</div>
+      <div class="stat-lbl">连续记录天数</div>
+    </div>
+  </div>
+
+  <footer>
+    <button class="reset-btn" id="resetBtn">清空记录，重新开始</button>
+  </footer>
 </div>
 
-body {
-    background-color: #fdfaf6; /* 暖米色，降低视觉疲劳 */
-    font-family: 'Helvetica Neue', sans-serif;
-    color: #5a4e44; /* 深棕色，比纯黑更温和 */
+<script>
+const STORAGE_KEY = 'habit-tracker-entries';
+const NAME_KEY = 'habit-tracker-name';
+let entries = {}; // { '2026-07-13': 'g' }
+
+function todayStr(offset = 0) {
+  const d = new Date();
+  d.setDate(d.getDate() - offset);
+  return d.toISOString().slice(0, 10);
 }
 
-.task-card {
-    background: #ffffff;
-    border-radius: 16px; /* 圆角给人友好感 */
-    padding: 20px;
-    margin: 15px 0;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05); /* 轻微阴影，悬浮感 */
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-left: 5px solid #ffcc80; /* 暖橙色条，点亮心情 */
+function weekdayShort(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  return ['日','一','二','三','四','五','六'][d.getDay()];
 }
 
-.btn-check {
-    background-color: #81c784; /* 温和的绿色 */
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: transform 0.2s;
+async function loadData() {
+  try {
+    const res = await window.storage.get(STORAGE_KEY, false);
+    entries = res ? JSON.parse(res.value) : {};
+  } catch (e) { entries = {}; }
+  try {
+    const nameRes = await window.storage.get(NAME_KEY, false);
+    if (nameRes) document.getElementById('habitName').value = nameRes.value;
+  } catch (e) {}
+  render();
 }
 
-.btn-check:hover {
-    transform: scale(1.05);
+async function saveEntries() {
+  try { await window.storage.set(STORAGE_KEY, JSON.stringify(entries), false); }
+  catch (e) { console.error('save failed', e); }
 }
 
-textarea {
-    width: 100%;
-    height: 100px;
-    border: 1px solid #e0dcd9;
-    border-radius: 12px;
-    padding: 15px;
-    margin-top: 20px;
-    background: #fcf9f5;
+async function saveName(v) {
+  try { await window.storage.set(NAME_KEY, v, false); }
+  catch (e) {}
 }
 
-function markDone(btn) {
-    btn.innerText = "做得好！✨";
-    btn.style.backgroundColor = "#ffb74d"; // 变成暖橙色
-    btn.disabled = true;
+function logToday(v) {
+  entries[todayStr()] = v;
+  saveEntries();
+  render();
 }
+
+function last14() {
+  const arr = [];
+  for (let i = 13; i >= 0; i--) {
+    const ds = todayStr(i);
+    arr.push({ date: ds, v: entries[ds] || null });
+  }
+  return arr;
+}
+
+function pct(arr) {
+  const logged = arr.filter(x => x.v);
+  if (logged.length === 0) return null;
+  const green = logged.filter(x => x.v === 'g').length;
+  return Math.round((green / logged.length) * 100);
+}
+
+function renderDays() {
+  const row = document.getElementById('daysRow');
+  row.innerHTML = '';
+  last14().forEach(({ date, v }) => {
+    const el = document.createElement('div');
+    el.className = 'day';
+    const cellClass = v === 'g' ? 'g' : v === 'a' ? 'a' : v === 'b' ? 'b' : '';
+    el.innerHTML = `<div class="cell ${cellClass}"></div><div class="lbl">${weekdayShort(date)}</div>`;
+    row.appendChild(el);
+  });
+}
+
+function renderStats() {
+  const all = last14();
+  const thisWeek = all.slice(7, 14);
+  const lastWeek = all.slice(0, 7);
+  const tPct = pct(thisWeek);
+  const lPct = pct(lastWeek);
+
+  document.getElementById('thisWeekPct').textContent = tPct === null ? '–' : tPct + '%';
+
+  const deltaEl = document.getElementById('deltaLabel');
+  if (tPct === null || lPct === null) {
+    deltaEl.textContent = '';
+  } else {
+    const diff = tPct - lPct;
+    if (diff > 0) { deltaEl.textContent = `↑ 比上周高 ${diff}%`; deltaEl.className = 'stat-delta up'; }
+    else if (diff < 0) { deltaEl.textContent = `↓ 比上周低 ${-diff}%`; deltaEl.className = 'stat-delta down'; }
+    else { deltaEl.textContent = '与上周持平'; deltaEl.className = 'stat-delta flat'; }
+  }
+
+  // streak of consecutive logged days ending today
+  let streak = 0;
+  for (let i = 0; i < 30; i++) {
+    if (entries[todayStr(i)]) streak++; else break;
+  }
+  document.getElementById('streakNum').textContent = streak;
+}
+
+function renderTodayState() {
+  const t = entries[todayStr()];
+  document.querySelectorAll('.log-btn').forEach(b => {
+    b.classList.toggle('selected', b.dataset.v === t);
+  });
+  document.getElementById('todayNote').textContent = t
+    ? '今天已记录，点其他选项可修改'
+    : '今天还没记录';
+}
+
+// plant grows with overall green ratio across all logged days
+function renderPlant() {
+  const logged = Object.values(entries);
+  const svg = document.getElementById('plantSvg');
+  const caption = document.getElementById('plantCaption');
+
+  if (logged.length === 0) {
+    svg.innerHTML = seedSvg();
+    caption.textContent = '开始记录，看看这两周会长成什么样';
+    return;
+  }
+
+  const greenCount = logged.filter(v => v === 'g').length;
+  const ratio = greenCount / logged.length;
+  const days = logged.length;
+
+  let stage;
+  if (days < 3) stage = 0;
+  else if (ratio < 0.3) stage = 1;
+  else if (ratio < 0.55) stage = 2;
+  else if (ratio < 0.8) stage = 3;
+  else stage = 4;
+
+  svg.innerHTML = plantStageSvg(stage);
+  const labels = [
+    '刚种下种子，再记录几天看看',
+    '开始发芽了',
+    '长出第一片叶子',
+    '枝叶渐渐多了起来',
+    '长成一小片绿意'
+  ];
+  caption.innerHTML = `${labels[stage]} · 共记录 <b>${days}</b> 天，主动 <b>${Math.round(ratio*100)}%</b>`;
+}
+
+function seedSvg() {
+  return `<circle cx="60" cy="95" r="4" fill="#5B8C5A" opacity="0.5"/>
+  <ellipse cx="60" cy="108" rx="30" ry="6" fill="#DCE9D8"/>`;
+}
+
+function plantStageSvg(stage) {
+  const soil = `<ellipse cx="60" cy="108" rx="34" ry="6" fill="#DCE9D8"/>`;
+  const stem = h => `<line x1="60" y1="105" x2="60" y2="${105-h}" stroke="#5B8C5A" stroke-width="3" stroke-linecap="round"/>`;
+  const leaf = (x,y,rot,scale=1) => `<ellipse cx="${x}" cy="${y}" rx="${11*scale}" ry="6*scale" fill="#5B8C5A" transform="rotate(${rot} ${x} ${y})"/>`;
+  const leafPath = (x,y,rot,scale=1) => `<path d="M0,0 C 8,-10 22,-8 24,0 C 22,8 8,10 0,0 Z" fill="#6FA36D" transform="translate(${x} ${y}) rotate(${rot}) scale(${scale})"/>`;
+
+  if (stage === 1) {
+    return soil + stem(18) + leafPath(60,87,-30,0.6) ;
+  }
+  if (stage === 2) {
+    return soil + stem(30) + leafPath(60,80,-35,0.75) + leafPath(60,80,35,0.75);
+  }
+  if (stage === 3) {
+    return soil + stem(45) + leafPath(60,68,-40,0.9) + leafPath(60,68,40,0.9) + leafPath(60,52,-20,0.8) + leafPath(60,52,20,0.8);
+  }
+  if (stage === 4) {
+    return soil + stem(58)
+      + leafPath(60,58,-45,1) + leafPath(60,58,45,1)
+      + leafPath(60,42,-15,0.95) + leafPath(60,42,15,0.95)
+      + leafPath(60,28,-40,0.8) + leafPath(60,28,40,0.8)
+      + `<circle cx="60" cy="22" r="4" fill="#D9A544"/>`;
+  }
+  return soil + `<circle cx="60" cy="98" r="4" fill="#5B8C5A" opacity="0.6"/>`;
+}
+
+function render() {
+  renderPlant();
+  renderTodayState();
+  renderDays();
+  renderStats();
+}
+
+document.querySelectorAll('.log-btn').forEach(btn => {
+  btn.addEventListener('click', () => logToday(btn.dataset.v));
+});
+
+document.getElementById('habitName').addEventListener('change', (e) => {
+  saveName(e.target.value);
+});
+
+document.getElementById('resetBtn').addEventListener('click', async () => {
+  if (!confirm('确定要清空所有记录吗？这个操作无法撤销。')) return;
+  entries = {};
+  await saveEntries();
+  render();
+});
+
+loadData();
+</script>
+</body>
+</html>
