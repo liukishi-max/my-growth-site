@@ -77,8 +77,8 @@
   }
 
   .avatar-preview {
-    width: 88px;
-    height: 88px;
+    width: 96px;
+    height: 96px;
     border-radius: 50%;
     background: var(--green-soft);
     margin: 0 auto 12px;
@@ -86,15 +86,23 @@
     align-items: center;
     justify-content: center;
     position: relative;
-    font-size: 40px;
     transition: background 0.15s ease;
+    overflow: visible;
   }
+
+  .avatar-face {
+    width: 78px;
+    height: 78px;
+    display: block;
+  }
+  .avatar-face svg { width: 100%; height: 100%; display: block; }
 
   .avatar-accessory {
     position: absolute;
     top: -14px;
     font-size: 26px;
     line-height: 1;
+    z-index: 2;
   }
 
   .avatar-name-input {
@@ -114,6 +122,43 @@
   }
   .avatar-name-input:focus { border-bottom-color: var(--green); }
   .avatar-name-input::placeholder { color: #A6B0A2; font-weight: 400; }
+
+  .avatar-name-display {
+    display: none;
+    text-align: center;
+    font-family: 'Noto Serif SC', serif;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .confirm-btn {
+    display: block;
+    width: 100%;
+    margin-top: 18px;
+    padding: 12px;
+    border: none;
+    border-radius: 14px;
+    background: var(--green);
+    color: #fff;
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .confirm-btn:active { opacity: 0.85; }
+
+  .change-avatar-btn {
+    display: none;
+    margin: 4px auto 0;
+    background: none;
+    border: none;
+    color: var(--ink-soft);
+    font-size: 12px;
+    text-decoration: underline;
+    cursor: pointer;
+  }
 
   .avatar-row-label {
     font-size: 11.5px;
@@ -144,6 +189,23 @@
   .opt-btn.picked { box-shadow: inset 0 0 0 2px var(--green); }
 
   .opt-btn.color-swatch { font-size: 0; }
+
+  .opt-btn.face-opt {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    padding: 0;
+    overflow: hidden;
+    background: var(--bg);
+  }
+  .opt-btn.face-opt svg { width: 100%; height: 100%; display: block; }
+
+  .opt-btn.text-opt {
+    width: auto;
+    padding: 0 14px;
+    border-radius: 18px;
+    font-size: 13px;
+  }
 
   /* 发芽 signature */
   .plant-card {
@@ -204,6 +266,31 @@
     font-size: 12.5px;
     color: var(--ink-soft);
     margin: -10px 0 20px;
+  }
+
+  .done-state {
+    display: none;
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 18px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .done-msg {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 15px;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+
+  .edit-today-btn {
+    background: none;
+    border: none;
+    color: var(--ink-soft);
+    font-size: 12px;
+    text-decoration: underline;
+    cursor: pointer;
   }
 
   /* history */
@@ -308,18 +395,28 @@
   <div class="avatar-card">
     <div class="avatar-preview" id="avatarPreview">
       <span class="avatar-accessory" id="avatarAccessory"></span>
-      <span class="avatar-face" id="avatarFace">😊</span>
+      <span class="avatar-face" id="avatarFace"></span>
     </div>
+    <div class="avatar-name-display" id="avatarNameDisplay"></div>
     <input class="avatar-name-input" id="avatarNameInput" placeholder="点这里给自己起个名字" maxlength="8" />
 
-    <div class="avatar-row-label">选表情</div>
-    <div class="avatar-options" id="faceOptions"></div>
+    <div id="avatarEditSection">
+      <div class="avatar-row-label">选表情</div>
+      <div class="avatar-options" id="faceOptions"></div>
 
-    <div class="avatar-row-label">选颜色</div>
-    <div class="avatar-options" id="colorOptions"></div>
+      <div class="avatar-row-label">选颜色</div>
+      <div class="avatar-options" id="colorOptions"></div>
 
-    <div class="avatar-row-label">选配饰</div>
-    <div class="avatar-options" id="accessoryOptions"></div>
+      <div class="avatar-row-label">选配饰</div>
+      <div class="avatar-options" id="accessoryOptions"></div>
+
+      <div class="avatar-row-label">眼镜</div>
+      <div class="avatar-options" id="glassesOptions"></div>
+
+      <button class="confirm-btn" id="confirmAvatarBtn">就是它啦，确定</button>
+    </div>
+
+    <button class="change-avatar-btn" id="changeAvatarBtn">更换形象</button>
   </div>
 
   <div class="plant-card">
@@ -327,7 +424,7 @@
     <div class="plant-caption" id="plantCaption">开始记录，看看这两周会长成什么样</div>
   </div>
 
-  <div class="log-row">
+  <div class="log-row" id="logRow">
     <button class="log-btn green" data-v="g">
       <span class="dot"></span>今天主动开始
     </button>
@@ -339,6 +436,11 @@
     </button>
   </div>
   <div class="today-note" id="todayNote">今天还没记录</div>
+
+  <div class="done-state" id="logDoneState">
+    <div class="done-msg" id="doneMessage">今天已经打卡啦，明天再来哦 🌱</div>
+    <button class="edit-today-btn" id="editTodayBtn">修改今天的记录</button>
+  </div>
 
   <div class="section-title">最近14天</div>
   <div class="days" id="daysRow"></div>
@@ -366,27 +468,114 @@ const NAME_KEY = 'habit-tracker-name';
 const AVATAR_KEY = 'habit-tracker-avatar';
 let entries = {}; // { '2026-07-13': 'g' }
 
-const FACE_OPTIONS = ['😊','😺','🐻','🦄','🐰','🐼','🐸','🦁'];
+const FACE_CONFIGS = [
+  { id: 'a', hair: '#3D2B1F', skin: '#FCE4CB', style: 'short' },
+  { id: 'b', hair: '#8B5E3C', skin: '#FCE4CB', style: 'twintails' },
+  { id: 'c', hair: '#2E2E2E', skin: '#F5D0A9', style: 'antenna' },
+  { id: 'd', hair: '#C97B63', skin: '#FCE4CB', style: 'bun' },
+  { id: 'e', hair: '#A0522D', skin: '#E8B588', style: 'curly' },
+  { id: 'f', hair: '#1A1A1A', skin: '#FCE4CB', style: 'long' },
+  { id: 'g', hair: '#D4A574', skin: '#F5D0A9', style: 'short' },
+  { id: 'h', hair: '#5C4033', skin: '#FCE4CB', style: 'doublebun' },
+];
+
+const STROKE = '#4A3728';
+
+function chibiSvgMarkup(cfg, withGlasses = false) {
+  const hairBase = `<ellipse cx="50" cy="46" rx="46" ry="42" fill="${cfg.hair}" stroke="${STROKE}" stroke-width="2.5"/>`;
+  let curly = '';
+  if (cfg.style === 'curly') {
+    for (let i = 0; i < 8; i++) {
+      const angle = (i / 8) * Math.PI * 2;
+      const cx = (50 + Math.cos(angle) * 44).toFixed(1);
+      const cy = (42 + Math.sin(angle) * 38).toFixed(1);
+      curly += `<circle cx="${cx}" cy="${cy}" r="10" fill="${cfg.hair}" stroke="${STROKE}" stroke-width="2"/>`;
+    }
+  }
+  const face = `<circle cx="50" cy="55" r="39" fill="${cfg.skin}" stroke="${STROKE}" stroke-width="2.5"/>`;
+
+  let extra = '';
+  if (cfg.style === 'twintails') {
+    extra = `<ellipse cx="12" cy="66" rx="9" ry="20" fill="${cfg.hair}" stroke="${STROKE}" stroke-width="2.5"/><ellipse cx="88" cy="66" rx="9" ry="20" fill="${cfg.hair}" stroke="${STROKE}" stroke-width="2.5"/>`;
+  } else if (cfg.style === 'antenna') {
+    extra = `<path d="M50,8 C45,1 55,-3 59,4 C55,4 52,9 52,14" fill="none" stroke="${cfg.hair}" stroke-width="4" stroke-linecap="round"/>`;
+  } else if (cfg.style === 'bun') {
+    extra = `<circle cx="50" cy="9" r="11" fill="${cfg.hair}" stroke="${STROKE}" stroke-width="2.5"/>`;
+  } else if (cfg.style === 'long') {
+    extra = `<path d="M10,30 Q5,68 14,96 L27,96 Q20,60 23,28 Z" fill="${cfg.hair}" stroke="${STROKE}" stroke-width="2.5"/><path d="M90,30 Q95,68 86,96 L73,96 Q80,60 77,28 Z" fill="${cfg.hair}" stroke="${STROKE}" stroke-width="2.5"/>`;
+  } else if (cfg.style === 'doublebun') {
+    extra = `<circle cx="19" cy="18" r="10" fill="${cfg.hair}" stroke="${STROKE}" stroke-width="2.5"/><circle cx="81" cy="18" r="10" fill="${cfg.hair}" stroke="${STROKE}" stroke-width="2.5"/>`;
+  }
+
+  const eyes = `
+    <ellipse cx="35" cy="59" rx="4.6" ry="6.2" fill="#33241D"/>
+    <ellipse cx="65" cy="59" rx="4.6" ry="6.2" fill="#33241D"/>
+    <circle cx="33.2" cy="56" r="1.5" fill="#FFFFFF"/>
+    <circle cx="63.2" cy="56" r="1.5" fill="#FFFFFF"/>
+    <path d="M27,48 Q35,44 43,48" fill="none" stroke="${cfg.hair}" stroke-width="2" stroke-linecap="round" opacity="0.85"/>
+    <path d="M57,48 Q65,44 73,48" fill="none" stroke="${cfg.hair}" stroke-width="2" stroke-linecap="round" opacity="0.85"/>
+  `;
+  const blush = `<ellipse cx="25" cy="69" rx="9" ry="5.5" fill="#F5A8A0" opacity="0.65"/><ellipse cx="75" cy="69" rx="9" ry="5.5" fill="#F5A8A0" opacity="0.65"/>`;
+  const mouth = `<path d="M45,75 Q50,78.5 55,75" fill="none" stroke="${STROKE}" stroke-width="2" stroke-linecap="round"/>`;
+
+  const glasses = withGlasses ? `
+    <circle cx="35" cy="58" r="14" fill="#FFFFFF" opacity="0.12" stroke="${STROKE}" stroke-width="2.5"/>
+    <circle cx="65" cy="58" r="14" fill="#FFFFFF" opacity="0.12" stroke="${STROKE}" stroke-width="2.5"/>
+    <line x1="49" y1="57" x2="51" y2="57" stroke="${STROKE}" stroke-width="2.5"/>
+    <line x1="21" y1="56" x2="14" y2="52" stroke="${STROKE}" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="79" y1="56" x2="86" y2="52" stroke="${STROKE}" stroke-width="2.5" stroke-linecap="round"/>
+  ` : '';
+
+  return `<svg viewBox="0 0 100 100">${hairBase}${curly}${face}${extra}${eyes}${blush}${mouth}${glasses}</svg>`;
+}
+
+function getFaceConfig(id) {
+  return FACE_CONFIGS.find(c => c.id === id) || FACE_CONFIGS[0];
+}
+
 const COLOR_OPTIONS = ['#DCE9D8','#F5E9CE','#F3DCD8','#DCE6F2','#EADCF2','#F2E6D8'];
 const ACCESSORY_OPTIONS = ['无','👑','🎩','🎀','🌸','⭐','🕶️','🧢'];
 
-let avatar = { face: '😊', color: '#DCE9D8', accessory: '无', name: '' };
+let avatar = { face: 'a', color: '#DCE9D8', accessory: '无', glasses: false, name: '', confirmed: false };
 
 function renderTodayDate() {
-  const d = new Date();
+  const ds = todayStr(0);
+  const d = new Date(ds + 'T00:00:00');
   const weekdays = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
-  const txt = `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 · ${weekdays[d.getDay()]}`;
+  const txt = `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 · ${weekdays[d.getDay()]}（美国中部时间）`;
   document.getElementById('todayDate').textContent = txt;
 }
 
+let editingAvatar = false;
+
 function renderAvatar() {
-  document.getElementById('avatarFace').textContent = avatar.face;
+  document.getElementById('avatarFace').innerHTML = chibiSvgMarkup(getFaceConfig(avatar.face), avatar.glasses);
   document.getElementById('avatarAccessory').textContent = avatar.accessory === '无' ? '' : avatar.accessory;
   document.getElementById('avatarPreview').style.background = avatar.color;
-  document.getElementById('avatarNameInput').value = avatar.name;
 
-  document.getElementById('faceOptions').innerHTML = FACE_OPTIONS.map(f =>
-    `<button class="opt-btn ${f === avatar.face ? 'picked' : ''}" data-type="face" data-v="${f}">${f}</button>`
+  const editSection = document.getElementById('avatarEditSection');
+  const nameInput = document.getElementById('avatarNameInput');
+  const nameDisplay = document.getElementById('avatarNameDisplay');
+  const changeBtn = document.getElementById('changeAvatarBtn');
+
+  if (!editingAvatar) {
+    editSection.style.display = 'none';
+    nameInput.style.display = 'none';
+    changeBtn.style.display = 'block';
+    changeBtn.textContent = avatar.confirmed ? '更换形象' : '自定义你自己的头像么？点击编辑';
+    nameDisplay.style.display = avatar.name ? 'block' : 'none';
+    nameDisplay.textContent = avatar.name;
+    return;
+  }
+
+  editSection.style.display = 'block';
+  nameInput.style.display = 'block';
+  nameInput.value = avatar.name;
+  changeBtn.style.display = 'none';
+  nameDisplay.style.display = 'none';
+
+  document.getElementById('faceOptions').innerHTML = FACE_CONFIGS.map(cfg =>
+    `<button class="opt-btn face-opt ${cfg.id === avatar.face ? 'picked' : ''}" data-type="face" data-v="${cfg.id}">${chibiSvgMarkup(cfg, avatar.glasses)}</button>`
   ).join('');
 
   document.getElementById('colorOptions').innerHTML = COLOR_OPTIONS.map(c =>
@@ -397,9 +586,18 @@ function renderAvatar() {
     `<button class="opt-btn ${a === avatar.accessory ? 'picked' : ''}" data-type="accessory" data-v="${a}">${a === '无' ? '✕' : a}</button>`
   ).join('');
 
+  document.getElementById('glassesOptions').innerHTML = `
+    <button class="opt-btn text-opt ${!avatar.glasses ? 'picked' : ''}" data-type="glasses" data-v="off">不戴</button>
+    <button class="opt-btn text-opt ${avatar.glasses ? 'picked' : ''}" data-type="glasses" data-v="on">戴眼镜</button>
+  `;
+
   document.querySelectorAll('.avatar-options .opt-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      avatar[btn.dataset.type] = btn.dataset.v;
+      if (btn.dataset.type === 'glasses') {
+        avatar.glasses = btn.dataset.v === 'on';
+      } else {
+        avatar[btn.dataset.type] = btn.dataset.v;
+      }
       saveAvatar();
       renderAvatar();
     });
@@ -419,9 +617,12 @@ function loadAvatar() {
 }
 
 function todayStr(offset = 0) {
-  const d = new Date();
-  d.setDate(d.getDate() - offset);
-  return d.toISOString().slice(0, 10);
+  const t = Date.now() - offset * 86400000;
+  // Always resolve "today" against US Central Time, regardless of the device's own timezone.
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Chicago',
+    year: 'numeric', month: '2-digit', day: '2-digit'
+  }).format(new Date(t));
 }
 
 function weekdayShort(dateStr) {
@@ -454,8 +655,11 @@ async function saveName(v) {
   catch (e) {}
 }
 
+let editingToday = false;
+
 function logToday(v) {
   entries[todayStr()] = v;
+  editingToday = false;
   saveEntries();
   render();
 }
@@ -520,9 +724,21 @@ function renderTodayState() {
   document.querySelectorAll('.log-btn').forEach(b => {
     b.classList.toggle('selected', b.dataset.v === t);
   });
-  document.getElementById('todayNote').textContent = t
-    ? '今天已记录，点其他选项可修改'
-    : '今天还没记录';
+
+  const logRow = document.getElementById('logRow');
+  const todayNote = document.getElementById('todayNote');
+  const doneState = document.getElementById('logDoneState');
+
+  if (t && !editingToday) {
+    logRow.style.display = 'none';
+    todayNote.style.display = 'none';
+    doneState.style.display = 'block';
+  } else {
+    logRow.style.display = 'grid';
+    todayNote.style.display = 'block';
+    doneState.style.display = 'none';
+    todayNote.textContent = t ? '今天已记录，点其他选项可修改' : '今天还没记录';
+  }
 }
 
 // plant grows with overall green ratio across all logged days
@@ -600,6 +816,11 @@ document.querySelectorAll('.log-btn').forEach(btn => {
   btn.addEventListener('click', () => logToday(btn.dataset.v));
 });
 
+document.getElementById('editTodayBtn').addEventListener('click', () => {
+  editingToday = true;
+  renderTodayState();
+});
+
 document.getElementById('habitName').addEventListener('change', (e) => {
   saveName(e.target.value);
 });
@@ -607,6 +828,19 @@ document.getElementById('habitName').addEventListener('change', (e) => {
 document.getElementById('avatarNameInput').addEventListener('change', (e) => {
   avatar.name = e.target.value;
   saveAvatar();
+});
+
+document.getElementById('confirmAvatarBtn').addEventListener('click', () => {
+  avatar.name = document.getElementById('avatarNameInput').value;
+  avatar.confirmed = true;
+  editingAvatar = false;
+  saveAvatar();
+  renderAvatar();
+});
+
+document.getElementById('changeAvatarBtn').addEventListener('click', () => {
+  editingAvatar = true;
+  renderAvatar();
 });
 
 document.getElementById('resetBtn').addEventListener('click', async () => {
